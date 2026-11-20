@@ -9,7 +9,7 @@ import { runDesktopCampaignCheckin } from "./src/campaign.mjs"
 import { createQwenWorkReuseMethods, latestQwenWorkCredential, qwenWorkDisplayName, syncQwenWorkCredentialFamily } from "./src/qwenwork-import.mjs"
 
 const PROVIDER = "qwenwork-affiliate"
-const PROVIDER_NAME = "千问办公免费领基础会员+500积分 QwenWork Free Basic"
+const PROVIDER_NAME = "千问办公 QwenWork"
 const DEFAULT_ATTRIBUTION_ID = "xingdoukejidownload162"
 const SITE = Object.freeze({ ...qwenWorkInternal.SITES.qwenwork, id: PROVIDER, name: PROVIDER_NAME })
 const makeQwenWork = protocol.makePlugin(SITE)

@@ -7,7 +7,7 @@
 export const PROVIDER = "qwenwork-affiliate"
 
 /** 卡片上显示的供应商名：必须 <中文> <English>，英文照抄厂商官方品牌写法 */
-export const PROVIDER_NAME = "千问办公免费领基础会员+500积分 QwenWork Free Basic"
+export const PROVIDER_NAME = "千问办公 QwenWork"
 
 /** 上游 API 基址 */
 export const BASE = "https://gateway.qwenwork.cn"

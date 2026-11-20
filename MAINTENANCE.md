@@ -5,8 +5,8 @@
 | 项 | 值 |
 |---|---|
 | 仓库 | `MYCF711/magpie-qwenwork-affiliate`（GitHub 公开仓库） |
-| 显示名 | 千问办公免费领基础会员+500积分 QwenWork Free Basic |
-| 当前版本 | `0.4.1` |
+| 显示名 | 千问办公 QwenWork |
+| 当前版本 | `0.4.2` |
 | Provider | `qwenwork-affiliate`（内部 ID，保留以兼容现有账号） |
 | 定位 | 脱离千问办公客户端的模型供应商、已有账号复用与基础版自动领取 |
 
