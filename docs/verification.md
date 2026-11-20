@@ -6,9 +6,9 @@
 
 | 项目 | 命令 | 结果 |
 |---|---|---|
-| 全量测试 | `npm test` | 443 pass / 0 fail |
+| 全量测试 | `npm test` | 445 pass / 0 fail |
 | 入口契约 | `node --test tests/mount.test.mjs` | 8 pass；无插件选项、无额外登录字段、固定渠道 |
-| 账号复用 | `node --test tests/qwenwork-import.test.mjs` | 6 pass；发现、UID 去重、flow callback、掩码名称 |
+| 账号复用 | `node --test tests/qwenwork-import.test.mjs` | 8 pass；发现、UID 去重、最新凭据、flow callback、旋转续期同步 |
 | 自动签到 | `node --test tests/campaign.test.mjs` | 9 pass |
 | 合规 | `node scripts/check.mjs` | 45 pass / 0 warning / 0 fail |
 | 错误码 | `npm run check:errors` | 0 fail |
@@ -73,7 +73,8 @@ claim → ensure
 - 已在 `qwenwork-affiliate` 中存在的 UID 不再显示复用入口。
 - 复用 authorize 立即返回 `opened=true` 的 flow，callback 返回原 OAuth / device 字段，固定渠道重新写入，聊天 refresh token 不变。
 - `accountId` 使用掩码昵称，UID 仍只作身份键。
-- 复用过程不发网络请求；添加后由现有自动签到完成会员领取。
+- 复用过程不发网络请求；点击时重新读取最新凭据，添加后由现有自动签到完成会员领取。
+- 续期优先采用同一 UID 的最新有效凭据；旋转旧链后同步相关 QwenWork 记录，独立新链不覆盖。
 
 ## 7. 回滚
 

@@ -6,7 +6,7 @@ import { uidOf } from "./src/credential.mjs"
 import { ICON } from "./src/icon.mjs"
 import { normalizeDistributionChannel, parseAttribution, withAttribution } from "./src/growth.mjs"
 import { runDesktopCampaignCheckin } from "./src/campaign.mjs"
-import { createQwenWorkReuseMethods, qwenWorkDisplayName } from "./src/qwenwork-import.mjs"
+import { createQwenWorkReuseMethods, latestQwenWorkCredential, qwenWorkDisplayName, syncQwenWorkCredentialFamily } from "./src/qwenwork-import.mjs"
 
 const PROVIDER = "qwenwork-affiliate"
 const PROVIDER_NAME = "千问办公免费领基础会员+500积分 QwenWork Free Basic"
@@ -110,10 +110,20 @@ export const QwenWorkAffiliateAuthPlugin = async (_ctx = {}, _options = {}) => {
       options: [],
       methods: [...reuseMethods, method, ...base.auth.methods.filter((item) => item !== oauth)],
       async refresh(auth, provider) {
-        const refreshed = await base.auth.refresh(auth, provider)
+        const shared = latestQwenWorkCredential(auth?.uid, _options?.qwenWorkImport)
+        const sharedAuth = shared?.credential ?? auth
+        if (shared && sharedAuth.access !== auth?.access
+          && Number(sharedAuth.expires ?? 0) > Number(auth?.expires ?? 0)
+          && Number(sharedAuth.expires ?? 0) > Date.now() + 60_000) {
+          const displayName = qwenWorkDisplayName({ ...auth, ...sharedAuth })
+          return { ...auth, ...sharedAuth, accountId: displayName, cardName: displayName, attributionId: DEFAULT_ATTRIBUTION_ID }
+        }
+        const refreshed = await base.auth.refresh(sharedAuth, provider)
         if (!refreshed) return refreshed
+        syncQwenWorkCredentialFamily({ uid: auth?.uid, previous: sharedAuth, refreshed, ...(_options?.qwenWorkImport ?? {}) })
         const displayName = qwenWorkDisplayName({ ...auth, ...refreshed })
         return {
+          ...auth,
           ...refreshed,
           accountId: displayName,
           cardName: displayName,
