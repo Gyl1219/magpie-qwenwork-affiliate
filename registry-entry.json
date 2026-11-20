@@ -1,0 +1,11 @@
+{
+  "package": "magpie-qwenwork-affiliate",
+  "name": "千问办公免费领基础会员+500积分 QwenWork Free Basic",
+  "providers": [
+    "qwenwork-affiliate"
+  ],
+  "summary": {
+    "en": "Use QwenWork models without the desktop client, reuse existing accounts, and automatically claim Basic membership and 500 monthly credits.",
+    "zh": "脱离千问办公客户端使用模型，可复用本机已有账号，并自动领取个人基础版与500月度积分。"
+  }
+}

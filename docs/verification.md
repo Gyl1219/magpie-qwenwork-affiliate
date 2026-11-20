@@ -1,0 +1,84 @@
+# 验证记录
+
+更新时间：2026-11-21（Asia/Shanghai）。本页区分离线测试、公开接口和真实账号验收。
+
+## 1. 离线与静态门禁
+
+| 项目 | 命令 | 结果 |
+|---|---|---|
+| 全量测试 | `npm test` | 443 pass / 0 fail |
+| 入口契约 | `node --test tests/mount.test.mjs` | 8 pass；无插件选项、无额外登录字段、固定渠道 |
+| 账号复用 | `node --test tests/qwenwork-import.test.mjs` | 6 pass；发现、UID 去重、flow callback、掩码名称 |
+| 自动签到 | `node --test tests/campaign.test.mjs` | 9 pass |
+| 合规 | `node scripts/check.mjs` | 45 pass / 0 warning / 0 fail |
+| 错误码 | `npm run check:errors` | 0 fail |
+| User-Agent | `npm run check:ua` | 0 fail / 0 warning |
+| 文档时效 | `node scripts/check-docs.mjs` | 4 pass / 0 fail |
+| 隐私 | `node scripts/privacy-scan.mjs` | PASS，0 处 |
+
+公开仓库不包含 `tests/`、`.github/` 或本机凭据；测试文件仅保留在本机。
+
+## 2. 安装链接
+
+- HTTP 200，无重定向；自定义下载文件名不改变文件内容。
+- 文件大小：422,465,936 B。
+- SHA256：`55f98707afcefe4ebea2b86a8061de968bbccc55534066dee64af58baa943453`。
+- Authenticode Valid，主体 `DingTalk Technology Co., Ltd.`；内层 `QwenWorkCN.exe` 签名一致。
+- 插件运行不依赖该安装包，也不启动桌面客户端。
+
+## 3. 固定渠道与设备授权
+
+```text
+GET /attribution/query?attribution_id=xingdoukejidownload162
+→ 200，source_type=fixed
+```
+
+设备授权使用 `/users/sign-in → oauth_callback` 两段式流程。新登录不再展示渠道输入，固定写入规范化渠道 `xingdoukejidownload162`；传入其它渠道或环境变量也不会覆盖。
+
+## 4. 三个账号最终套餐与积分
+
+三个独立账号均通过官方 `account-context` 与 `wallets` 回读，HTTP 均为 200：
+
+| 账号 | 最终套餐 | 月度积分 | 当前总余额 | 下一次刷新 |
+|---|---|---:|---:|---|
+| `****6710` | `qwen-office-basic` / 个人基础版 | 500 | 503.8529 | 2026-12-20 21:08:07（UTC+8） |
+| `****8051` | `qwen-office-basic` / 个人基础版 | 500 | 504.8287 | 2026-12-21 01:42:33（UTC+8） |
+| `****0632` | `qwen-office-basic` / 个人基础版 | 500 | 504.9673 | 2026-12-21 01:42:45（UTC+8） |
+
+总余额由 500 月度积分与原有长期积分构成。`qwenwork#d2ur33` 与 `qwenwork-affiliate` 是同一个 `****6710` 账号，不计为第四个独立账号。
+
+## 5. 自动签到与身份切换
+
+```text
+读取 account-context
+→ 已是 qwen-office-basic：跳过
+
+claim → ensure
+→ should_redirect=true
+→ POST /api/v1/adapter/auth/switch {"target":"c"}
+→ materials + SHA256
+→ session / turn 上报
+→ claim
+```
+
+- 真实回放 session / turn 均 HTTP 200。
+- 官方 claim 先返回 `202 processing`，随后 `200 succeeded`。
+- 全程未调用模型，未消耗模型 tokens。
+- 三个账号再次签到：第一次只读一次套餐，第二次命中账号缓存且零额外网络请求。
+- processing 通过 `until` 交宿主复查；插件不创建额外定时器。
+
+## 6. 已有账号复用
+
+- 只读取本机 Magpie `plugin:qwenwork` 的登录索引和凭据。
+- 已在 `qwenwork-affiliate` 中存在的 UID 不再显示复用入口。
+- 复用 authorize 立即返回 `opened=true` 的 flow，callback 返回原 OAuth / device 字段，固定渠道重新写入，聊天 refresh token 不变。
+- `accountId` 使用掩码昵称，UID 仍只作身份键。
+- 复用过程不发网络请求；添加后由现有自动签到完成会员领取。
+
+## 7. 回滚
+
+```bash
+magpie plugin rm magpie-qwenwork-affiliate
+```
+
+只移除本插件及其账号，不删除原 `qwenwork` 渠道，不修改全局代理。迁移前备份：`research/account-migration-backup-2026-11-20T17-30-53-327Z/`。
